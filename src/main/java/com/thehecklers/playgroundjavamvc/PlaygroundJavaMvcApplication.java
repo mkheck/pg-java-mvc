@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -30,14 +32,16 @@ class DataLoader {
 
     @PostConstruct
     void load() {
-        String[] shipNames = "Enterprise, Constitution, Farragut, Defiant, Excalibur, Exeter, Lexington, Hood, Intrepid, Voyager".split(", ");
-        String[] captains = "Kirk, Pike, Decker, Tracey, Sulu, Janeway, Archer".split(", ");
+        List<String> shipNames = Arrays.asList("Enterprise", "Constitution", "Farragut", "Defiant", "Excalibur", "Exeter",
+                "Lexington", "Hood", "Intrepid", "Voyager");
+        List<String> captains = Arrays.asList("Kirk", "Pike", "Decker", "Tracey", "Sulu", "Janeway", "Archer");
+
         Random rnd = new Random();
 
         for (int x = 0;
              x < 1000;
              x++) {
-            repo.save(new Ship(shipNames[rnd.nextInt(shipNames.length)], captains[rnd.nextInt(captains.length)]));
+            repo.save(new Ship(shipNames.get(rnd.nextInt(shipNames.size())), captains.get(rnd.nextInt(captains.size()))));
         }
 
         repo.findAll().forEach(System.out::println);
@@ -45,17 +49,16 @@ class DataLoader {
 }
 
 @RestController
-@RequestMapping("/ships")
 @AllArgsConstructor
 class ShipController {
     private final ShipRepository repo;
 
-    @GetMapping
+    @GetMapping("/ships")
     Iterable<Ship> getAllShips() {
         return repo.findAll();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/ships/{id}")
     Optional<Ship> getShipById(@PathVariable String id) {
         return repo.findById(id);
     }
